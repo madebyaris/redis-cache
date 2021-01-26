@@ -93,7 +93,7 @@ class Metrics {
      */
     public static function is_enabled() {
         return ! defined( 'WP_REDIS_DISABLE_METRICS' )
-            || WP_REDIS_DISABLE_METRICS;
+            || ! WP_REDIS_DISABLE_METRICS;
     }
 
     /**
@@ -117,7 +117,7 @@ class Metrics {
      */
     public static function max_time() {
         if ( defined( 'WP_REDIS_METRICS_MAX_TIME' ) ) {
-            return intval( WP_REDIS_METRICS_MAX_TIME );
+            return (int) WP_REDIS_METRICS_MAX_TIME;
         }
 
         return HOUR_IN_SECONDS;
@@ -129,8 +129,6 @@ class Metrics {
      * @return void
      */
     public static function record() {
-        global $wp_object_cache;
-
         if ( ! self::is_active() ) {
             return;
         }
@@ -176,7 +174,7 @@ class Metrics {
         }
 
         try {
-            $serialied_metrics = $wp_object_cache->redis_instance()->zrangebyscore(
+            $raw_metrics = $wp_object_cache->redis_instance()->zrangebyscore(
                 $wp_object_cache->build_key( 'metrics', 'redis-cache' ),
                 time() - $seconds,
                 time() - MINUTE_IN_SECONDS,
@@ -192,7 +190,7 @@ class Metrics {
         $metrics = [];
         $prefix = sprintf( 'O:%d:"%s', strlen( self::class ), self::class );
 
-        foreach ( $serialied_metrics as $serialized => $timestamp ) {
+        foreach ( $raw_metrics as $serialized => $timestamp ) {
             // Compatibility: Ignore all non serialized entries as they were used by prior versions.
             if ( strpos( $serialized, $prefix ) !== 0 ) {
                 continue;

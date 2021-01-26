@@ -228,10 +228,19 @@ class Plugin {
      * @return string[]
      */
     public function add_plugin_actions_links( $links ) {
-        return array_merge(
-            [ sprintf( '<a href="%s">%s</a>', network_admin_url( $this->page ), esc_html__( 'Settings', 'redis-cache' ) ) ],
-            $links
+        $upgrade = sprintf(
+            '<a href="%s">%s</a>',
+            'https://objectcache.pro/?utm_source=wp-plugin&amp;utm_medium=action-link',
+            esc_html__( 'Upgrade', 'redis-cache' )
         );
+
+        $settings = sprintf(
+            '<a href="%s">%s</a>',
+            network_admin_url( $this->page ),
+            esc_html__( 'Settings', 'redis-cache' )
+        );
+
+        return array_merge( [ $upgrade, $settings ], $links );
     }
 
     /**
@@ -571,7 +580,7 @@ class Plugin {
         if ( ! current_user_can( is_multisite() ? 'manage_network_options' : 'manage_options' ) ) {
             return;
         }
-        
+
         // Do not display the dropin message if you want
         if ( defined( 'WP_REDIS_DISABLE_DROPIN_BANNERS' ) && WP_REDIS_DISABLE_DROPIN_BANNERS ) {
             return;
